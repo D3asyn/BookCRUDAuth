@@ -18,6 +18,11 @@ namespace BookCRUDAuth.Dbcontexts
 				.WithMany(a => a.Books)
 				.HasForeignKey(b => b.AuthorId);
 
-		}
+			modelBuilder.Entity<Author>()
+				.HasOne(a => a.User)
+				.WithMany()
+				.HasForeignKey(a => a.UserId);
+
+        }
 	}
 }

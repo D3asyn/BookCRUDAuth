@@ -4,6 +4,7 @@ using BookCRUDAuth.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using static System.Reflection.Metadata.BlobBuilder;
 
 namespace BookCRUDAuth.Controllers
@@ -16,9 +17,9 @@ namespace BookCRUDAuth.Controllers
 		[Authorize]
 		public async Task<IActionResult> Get()
 		{
-			var authors = await context.Authors.Include(a => a.Books).ToListAsync();
+			var authors = await context.Authors.Include(a => a.Books).Include(a => a.User).ToListAsync();
 
-			if(authors == null)
+            if (authors == null)
 			{
 				return BadRequest("No authors found");
 			}
@@ -27,7 +28,8 @@ namespace BookCRUDAuth.Controllers
 			{
 				Name = a.Name,
 				BirthDate = a.BirthDate,
-				BookTitles = a.Books.Select(b => b.Title).ToList()
+                UserName = a.User?.UserName,
+                BookTitles = a.Books.Select(b => b.Title).ToList()
 			}).ToList();
 
 			return Ok(result);
@@ -37,7 +39,7 @@ namespace BookCRUDAuth.Controllers
         [Authorize]
         public async Task<IActionResult> GetById(int id)
 		{
-			var author = context.Authors.Include(a => a.Books).SingleOrDefault(x => x.Id == id);
+			var author = context.Authors.Include(a => a.Books).Include(a => a.User).SingleOrDefault(x => x.Id == id);
 
 			if(author == null)
 			{
@@ -48,7 +50,8 @@ namespace BookCRUDAuth.Controllers
 			{
 				Name = author.Name,
 				BirthDate = author.BirthDate,
-				BookTitles = author.Books.Select(b => b.Title).ToList()
+                UserName = author.User?.UserName,
+                BookTitles = author.Books.Select(b => b.Title).ToList()
 			};
 
 			return Ok(result);
@@ -58,8 +61,9 @@ namespace BookCRUDAuth.Controllers
         [Authorize]
         public async Task<IActionResult> Post([FromBody] AuthorDTO authorDto)
 		{
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-			if(authorDto == null)
+            if (authorDto == null)
 			{
 				return BadRequest("Input empty");
 			}
@@ -68,7 +72,8 @@ namespace BookCRUDAuth.Controllers
 			{
 				Name = authorDto.Name,
 				BirthDate = authorDto.BirthDate,
-			};
+                UserId = userId!
+            };
 
 			await context.Authors.AddAsync(author);
 			await context.SaveChangesAsync();
@@ -80,16 +85,19 @@ namespace BookCRUDAuth.Controllers
         public async Task<IActionResult> Put(int id, [FromBody] AuthorDTO authorDto)
 		{
 			var author = context.Authors.SingleOrDefault(x => x.Id == id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-			if(author == null)
+
+            if (author == null)
 			{
 				return BadRequest("No author found");
 			}
 
 			author.Name = authorDto.Name;
 			author.BirthDate = authorDto.BirthDate;
+			author.UserId = userId!;
 
-			await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 			return Ok("Update successfull");
 		}
 

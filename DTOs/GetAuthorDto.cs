@@ -6,6 +6,8 @@ namespace BookCRUDAuth.DTOs
 	{
 		public string Name { get; set; }
 		public DateTime BirthDate { get; set; }
-		public List<string> BookTitles { get; set; }
+        public string UserName { get; set; }
+
+        public List<string> BookTitles { get; set; }
 	}
 }

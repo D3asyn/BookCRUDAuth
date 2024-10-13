@@ -53,20 +53,6 @@ namespace BookCRUDAuth.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Authors",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    BirthDate = table.Column<DateTime>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Authors", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -173,6 +159,27 @@ namespace BookCRUDAuth.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Authors",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
+                    BirthDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Authors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Authors_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Books",
                 columns: table => new
                 {
@@ -231,6 +238,11 @@ namespace BookCRUDAuth.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Authors_UserId",
+                table: "Authors",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Books_AuthorId",
                 table: "Books",
                 column: "AuthorId");
@@ -261,10 +273,10 @@ namespace BookCRUDAuth.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Authors");
 
             migrationBuilder.DropTable(
-                name: "Authors");
+                name: "AspNetUsers");
         }
     }
 }

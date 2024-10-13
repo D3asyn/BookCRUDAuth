@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookCRUDAuth.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241013105801_init")]
+    [Migration("20241013125450_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -104,7 +104,13 @@ namespace BookCRUDAuth.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Authors");
                 });
@@ -259,6 +265,17 @@ namespace BookCRUDAuth.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("BookCRUDAuth.Entities.Author", b =>
+                {
+                    b.HasOne("BookCRUDAuth.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("BookCRUDAuth.Entities.Book", b =>
